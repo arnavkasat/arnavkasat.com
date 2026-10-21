@@ -40,8 +40,9 @@
   var PADDLE_R = 17;
   var PADDLE_REACH = 3.6 * SCALE;      // how high the paddle can touch the ball
   var BALL_R = 5;
-  var GRAVITY = 0.42;                  // px/frame^2 — about 3x real gravity, which plays better
-  var Z_SCALE = 0.42;                  // how much of the ball's height to render as lift
+  var GRAVITY = 0.25;                  // px/frame^2. Lower gravity means longer arcs, so the
+                                       // ball crosses the court slower and you get more time on it.
+  var Z_SCALE = 0.40;                  // how much of the ball's height to render as lift
   var RESTITUTION = 0.62;
 
   // `reach` is paddle speed in px/frame, `err` the prediction error in px,
@@ -540,7 +541,13 @@
   document.addEventListener('keydown', function (e) {
     if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
     var k = KEYMAP[e.key] || KEYMAP[e.key.toLowerCase()];
-    if (k) { G.keys[k] = true; e.preventDefault(); }
+    if (k) {
+      // Hand control to the keyboard. Without this the paddle keeps being
+      // pulled back toward wherever the mouse was last left sitting.
+      G.target = null;
+      G.keys[k] = true;
+      e.preventDefault();
+    }
     if (e.key === ' ') { e.preventDefault(); serve(); }
   });
   document.addEventListener('keyup', function (e) {
