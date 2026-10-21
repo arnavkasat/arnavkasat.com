@@ -1,0 +1,11 @@
+{
+  "name": "arnavkasat-com",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal site — a retro casino floor where the math is honest.",
+  "scripts": {
+    "test": "node test/strategy.test.js",
+    "dev": "python3 -m http.server 8787"
+  },
+  "license": "MIT"
+}

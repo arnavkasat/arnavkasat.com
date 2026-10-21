@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pickleball — Retro Sim — Arnav Kasat</title>
+<meta name="description" content="A top-down retro pickleball simulation on a to-scale court, with the kitchen rule, the two-bounce rule, and rally scoring to 11.">
+<meta name="theme-color" content="#04140d">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/retro.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="/">♠ ARNAV KASAT</a>
+    <a href="/#floor">← The Floor</a>
+    <a href="/games/blackjack.html">Blackjack</a>
+    <a href="/games/roulette.html">Roulette</a>
+    <a href="/games/odds.html">Odds Oracle</a>
+    <button class="crt-toggle" id="crtBtn" type="button">CRT: on</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section style="padding:22px 0 10px">
+  <div class="section-head" style="margin-bottom:10px">
+    <span class="num">♣</span><h2>Pickleball</h2><span class="rule"></span>
+  </div>
+  <p class="dim" style="max-width:68ch;margin:0">
+    A court to scale, with the kitchen rule enforced — on both sides.
+  </p>
+</section>
+
+<div class="pb-shell">
+  <div class="pb-score">
+    <span class="you">YOU <span id="youScore">0</span></span>
+    <span class="cpu"><span id="cpuScore">0</span> CPU</span>
+  </div>
+
+  <div class="table-felt" style="padding:12px">
+    <canvas id="court" width="400" height="760" aria-label="Pickleball court, viewed from above"></canvas>
+  </div>
+
+  <p class="mono" id="status" style="text-align:center;color:var(--neon-gold);min-height:2.2em;margin-top:12px"></p>
+
+  <div class="controls" style="justify-content:center">
+    <button class="btn" id="btnServe" type="button">Serve <span class="faint">(space)</span></button>
+    <button class="btn pink" id="btnReset" type="button">New game</button>
+    <label class="field" style="margin:0;min-width:150px">
+      <span>Opponent</span>
+      <select id="levelSel">
+        <option value="easy">Easy</option>
+        <option value="normal" selected>Normal</option>
+        <option value="hard">Hard</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="readout" style="margin-top:20px">
+    <div class="stat"><span class="k">Rally length</span><span class="v cyan" id="rallyLen">0</span></div>
+    <div class="stat"><span class="k">Longest rally</span><span class="v gold" id="longest">0</span></div>
+    <div class="stat"><span class="k">Kitchen faults</span><span class="v pink" id="faults">0</span></div>
+  </div>
+</div>
+
+<section class="grid two" style="padding-top:30px">
+  <div class="panel">
+    <h3 style="color:var(--neon-cyan)">Controls</h3>
+    <p class="dim" style="font-size:1.05rem">
+      Move with the mouse, your finger, or the arrow keys — WASD works too. Space
+      serves. Your paddle is the cyan ring and it can't cross the net.
+    </p>
+    <h3 style="color:var(--neon-gold);margin-top:18px">Shot shaping</h3>
+    <p class="dim" style="font-size:1.05rem">
+      Where the ball meets your paddle decides where it goes: contact on the left of
+      the face sends it left, and catching it off the very edge sends it wide of the
+      sideline. How deep you are when you make contact sets how deep the ball lands —
+      reach back for it and you hit deep, take it at the net and it comes back short.
+    </p>
+  </div>
+  <div class="panel">
+    <h3 style="color:var(--neon-cyan)">The rules it enforces</h3>
+    <p class="dim" style="font-size:1.05rem">
+      The court is 20 by 44 feet with a 7-foot non-volley zone either side of the net,
+      so the rules are geometry rather than decoration. A serve must bounce before the
+      receiver may hit it, a serve landing in the kitchen is a fault, and volleying
+      with your paddle inside the kitchen loses the rally. The opponent is held to all
+      three — it will let a ball bounce rather than fault itself.
+    </p>
+    <h3 style="color:var(--neon-gold);margin-top:18px">What's simplified</h3>
+    <p class="dim" style="font-size:1.05rem">
+      Real pickleball uses side-out scoring, where only the serving side can score and
+      a game to 11 can take a while. This uses rally scoring — every rally is a point,
+      first to 11, win by 2 — because it makes a better video game. The serve also
+      isn't required to land in the diagonal service court here, only past the kitchen
+      and inside the lines.
+    </p>
+    <p class="dim" style="font-size:1.05rem">
+      Everything else is enforced for both sides: the two-bounce rule, kitchen volleys,
+      double bounces, balls out, and balls into the net. Gravity runs about 3× real to
+      keep rallies brisk; ball speeds work out to roughly 12–40 mph, which is about right.
+    </p>
+  </div>
+</section>
+
+</main>
+
+<script src="/js/site.js"></script>
+<script src="/js/pickleball.js"></script>
+</body>
+</html>

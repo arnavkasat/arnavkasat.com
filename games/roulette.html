@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roulette — The House Edge, Visible — Arnav Kasat</title>
+<meta name="description" content="A roulette table that prints the probability, payout, and expected value of every bet before you spin, and simulates thousands of spins to show the edge converge.">
+<meta name="theme-color" content="#04140d">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/retro.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="/">♠ ARNAV KASAT</a>
+    <a href="/#floor">← The Floor</a>
+    <a href="/games/blackjack.html">Blackjack</a>
+    <a href="/games/odds.html">Odds Oracle</a>
+    <a href="/games/pickleball.html">Pickleball</a>
+    <button class="crt-toggle" id="crtBtn" type="button">CRT: on</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section style="padding-bottom:18px">
+  <div class="section-head">
+    <span class="num">♦</span><h2>Roulette</h2><span class="rule"></span>
+  </div>
+  <p class="dim" style="max-width:68ch">
+    Roulette is the cleanest house edge in the building, so this table shows it to you
+    instead of hiding it. Place any bet and you get its exact win probability, payout,
+    and expected value <em>before</em> the wheel turns. Then simulate a few thousand
+    spins and watch your realized return walk down to the theoretical number and stay there.
+  </p>
+</section>
+
+<div class="readout" style="margin-bottom:22px">
+  <div class="stat"><span class="k">Bankroll</span><span class="v gold" id="bankroll">$1,000</span></div>
+  <div class="stat"><span class="k">Total wagered</span><span class="v" id="wagered">$0</span></div>
+  <div class="stat"><span class="k">Net</span><span class="v gold" id="netResult">+$0</span></div>
+  <div class="stat"><span class="k">Realized return</span><span class="v cyan" id="realized">—</span></div>
+  <div class="stat"><span class="k">House edge</span><span class="v red" id="theoretical">-2.70%</span></div>
+  <div class="stat"><span class="k">Spins</span><span class="v" id="spinCount">0</span></div>
+  <div class="stat"><span class="k">Pockets</span><span class="v pink" id="pocketCount">37</span></div>
+</div>
+
+<div class="table-felt">
+  <div class="grid two" style="align-items:center;margin-bottom:18px">
+    <div class="rl-result green" id="result">–</div>
+    <div>
+      <label class="field">
+        <span>Wheel</span>
+        <select id="wheelSel">
+          <option value="eu">European — single zero, 37 pockets (−2.70%)</option>
+          <option value="us">American — double zero, 38 pockets (−5.26%)</option>
+        </select>
+      </label>
+      <p class="mono faint" style="margin:0">Recent: </p>
+      <div class="rl-hist" id="history" style="margin-top:6px"></div>
+    </div>
+  </div>
+
+  <div class="rl-scroll">
+    <div class="rl-felt" id="grid"></div>
+    <div class="rl-outside" id="outside"></div>
+  </div>
+
+  <div class="controls" id="chipRow">
+    <span class="chip c1" data-amt="1">$1</span>
+    <span class="chip c5 sel" data-amt="5">$5</span>
+    <span class="chip c25" data-amt="25">$25</span>
+    <span class="chip c100" data-amt="100">$100</span>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="btnSpin" type="button" disabled>Spin</button>
+    <button class="btn cyan" id="btnRebet" type="button">Rebet</button>
+    <button class="btn pink" id="btnClear" type="button">Clear bets</button>
+  </div>
+</div>
+
+<section class="grid two" style="padding-top:26px">
+
+  <div class="panel">
+    <h3 style="color:var(--neon-gold)">Your bets, priced</h3>
+    <div id="evPanel"></div>
+    <div style="height:1px;background:rgba(255,201,60,0.2);margin:18px 0"></div>
+    <h3 style="color:var(--neon-cyan)">Run it a few thousand times</h3>
+    <p class="dim" style="font-size:1rem">
+      Repeats the layout you've placed and settles every spin instantly. Small samples
+      wander; large ones don't.
+    </p>
+    <label class="field">
+      <span>Spins to simulate</span>
+      <select id="simCount">
+        <option value="100">100</option>
+        <option value="1000" selected>1,000</option>
+        <option value="10000">10,000</option>
+        <option value="100000">100,000</option>
+      </select>
+    </label>
+    <button class="btn cyan sm" id="btnSim" type="button">Simulate</button>
+    <div id="simResult" style="margin-top:14px"></div>
+    <p class="mono faint" style="margin:10px 0 0">
+      Simulated spins move the statistics above but not the bankroll. Staking
+      $15 a spin for ten thousand spins would bust a $1,000 stack long before
+      the average had room to show up — that's gambler's ruin, which is a
+      different lesson than this one.
+    </p>
+  </div>
+
+  <div class="panel">
+    <h3 style="color:var(--neon-cyan)">Spin log</h3>
+    <div class="log" id="log"></div>
+    <details style="margin-top:14px">
+      <summary class="mono" style="cursor:pointer;color:var(--neon-gold)">Why every bet has the same edge</summary>
+      <p class="dim" style="font-size:1rem;margin-top:10px">
+        A bet covering <em>n</em> pockets on a wheel of <em>N</em> wins with probability
+        <em>n/N</em> and pays <em>m</em> to 1. Its expected value per unit staked is
+      </p>
+      <p class="mono" style="color:var(--neon-cyan);text-align:center">
+        EV = (n/N)·m − (1 − n/N)
+      </p>
+      <p class="dim" style="font-size:1rem">
+        The payouts are set as if there were only 36 pockets — a straight-up number pays
+        35:1, a dozen pays 2:1, red pays 1:1, and in each case <em>n</em>·(<em>m</em>+1) = 36.
+        So EV = 36/N − 1, which is −1/37 = <strong>−2.70%</strong> on a single-zero wheel and
+        −2/38 = <strong>−5.26%</strong> on a double-zero wheel. The zeros are the entire
+        business model: every bet is paid at 36-pocket odds on a 37- or 38-pocket wheel.
+      </p>
+      <p class="dim" style="font-size:1rem">
+        Which is why no betting pattern helps. Combining, doubling, chasing, or spreading
+        across the felt just mixes bets that all carry the same percentage, and the sum of
+        many −2.70% bets is a −2.70% bet. The only lever that matters is which wheel you
+        sit at — and the American layout has one extra pocket that costs you nearly double.
+      </p>
+      <p class="dim" style="font-size:1rem">
+        The one bet worse than the rest: the American five-number bet on 0-00-1-2-3, which
+        pays 6:1 where the geometry calls for 6.6:1, running −7.89%. It isn't on this
+        layout on purpose.
+      </p>
+    </details>
+  </div>
+
+</section>
+
+<p class="faint mono" style="text-align:center;padding:10px 0 40px">
+  No wagering, no money, no accounts — the bankroll is a number in your browser tab.
+</p>
+
+</main>
+
+<script src="/js/site.js"></script>
+<script src="/js/roulette.js"></script>
+</body>
+</html>

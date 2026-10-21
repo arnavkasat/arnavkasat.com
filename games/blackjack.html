@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blackjack Count Trainer — Arnav Kasat</title>
+<meta name="description" content="A 6-deck blackjack trainer that grades your play against basic strategy and your Hi-Lo running count, hand by hand.">
+<meta name="theme-color" content="#04140d">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/retro.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="/">♠ ARNAV KASAT</a>
+    <a href="/#floor">← The Floor</a>
+    <a href="/games/roulette.html">Roulette</a>
+    <a href="/games/odds.html">Odds Oracle</a>
+    <a href="/games/pickleball.html">Pickleball</a>
+    <button class="crt-toggle" id="crtBtn" type="button">CRT: on</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section style="padding-bottom:18px">
+  <div class="section-head">
+    <span class="num">♠</span><h2>Blackjack — Count Trainer</h2><span class="rule"></span>
+  </div>
+  <p class="dim" style="max-width:68ch">
+    Six decks, dealer stands on all 17s, double after split, split to four hands,
+    blackjack pays 3:2. Every decision you make is graded against the basic-strategy
+    table for exactly those rules, and the running count only ever includes cards
+    you can actually see — the hole card joins the count the moment it's turned over.
+  </p>
+</section>
+
+<div class="readout" style="margin-bottom:22px">
+  <div class="stat"><span class="k">Running count</span><span class="v cyan" id="runCount">0</span></div>
+  <div class="stat"><span class="k">True count</span><span class="v pink" id="trueCount">0.0</span></div>
+  <div class="stat"><span class="k">Decks left</span><span class="v gold" id="decksLeft">6.0</span></div>
+  <div class="stat"><span class="k">Cards seen</span><span class="v" id="cardsSeen">0</span></div>
+  <div class="stat"><span class="k">Bankroll</span><span class="v gold" id="bankroll">$1000</span></div>
+  <div class="stat"><span class="k">Bet</span><span class="v" id="betAmt">$25</span></div>
+  <div class="stat"><span class="k">Hands</span><span class="v" id="handsPlayed">0</span></div>
+  <div class="stat"><span class="k">Strategy</span><span class="v cyan" id="stratAcc">—</span></div>
+  <div class="stat"><span class="k">Count calls</span><span class="v pink" id="countAcc">—</span></div>
+</div>
+
+<div class="table-felt">
+  <p class="mono faint" id="dealerLabel" style="margin:0 0 8px">Dealer</p>
+  <div class="hand" id="dealerHand"></div>
+
+  <div style="height:1px;background:rgba(255,201,60,0.2);margin:22px 0"></div>
+
+  <div class="grid" id="playerHands" style="gap:12px"></div>
+
+  <div class="banner" id="banner" style="display:none"></div>
+  <p class="mono" id="hint" style="display:none;color:var(--neon-gold);margin:12px 0 0"></p>
+
+  <div class="controls" id="chipRow">
+    <span class="chip c1" data-amt="5">$5</span>
+    <span class="chip c5" data-amt="10">$10</span>
+    <span class="chip c25 sel" data-amt="25">$25</span>
+    <span class="chip c100" data-amt="100">$100</span>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="btnDeal" type="button">Deal <span class="faint">(space)</span></button>
+    <button class="btn cyan" id="btnHit" type="button" disabled>Hit <span class="faint">(h)</span></button>
+    <button class="btn cyan" id="btnStand" type="button" disabled>Stand <span class="faint">(s)</span></button>
+    <button class="btn pink" id="btnDouble" type="button" disabled>Double <span class="faint">(d)</span></button>
+    <button class="btn pink" id="btnSplit" type="button" disabled>Split <span class="faint">(p)</span></button>
+    <button class="btn sm" id="btnReset" type="button">Rebuy &amp; reshuffle</button>
+  </div>
+
+  <div class="panel" id="insurancePanel" style="display:none;margin-top:16px;border-color:var(--neon-pink)">
+    <p style="margin:0 0 10px">
+      Dealer shows an ace. <strong>Insurance?</strong>
+      <span class="dim">It pays 2:1 on a bet of half your wager, so it's only worth
+      taking when tens are rich — true count ≥ +3. You're being graded on this one.</span>
+    </p>
+    <div class="controls" style="margin:0">
+      <button class="btn pink" id="btnIns" type="button">Take insurance</button>
+      <button class="btn" id="btnNoIns" type="button">No insurance</button>
+    </div>
+  </div>
+</div>
+
+<section class="grid two" style="padding-top:26px">
+
+  <div class="panel" id="countPanel">
+    <h3 style="color:var(--neon-pink)">Call the count</h3>
+    <p class="dim" style="font-size:1rem">
+      Say the running count at any point and get graded on it. Exact answers only —
+      that's the standard a real shoe holds you to.
+    </p>
+    <label class="field">
+      <span>Your running count</span>
+      <input type="number" id="countInput" placeholder="e.g. -3" step="1">
+    </label>
+    <div class="controls" style="margin:0 0 10px">
+      <button class="btn pink sm" id="btnCallCount" type="button">Call it</button>
+    </div>
+    <p class="mono" id="countFeedback" style="margin:0;min-height:2.4em"></p>
+    <label class="field" style="margin-top:8px">
+      <input type="checkbox" id="askToggle"> Make me call the count between hands
+    </label>
+    <label class="field" style="margin:0">
+      <input type="checkbox" id="peekToggle"> Show me the book (stops scoring)
+    </label>
+  </div>
+
+  <div class="panel">
+    <h3 style="color:var(--neon-cyan)">Decision log</h3>
+    <div class="log" id="log"></div>
+    <details style="margin-top:14px">
+      <summary class="mono" style="cursor:pointer;color:var(--neon-gold)">How Hi-Lo works</summary>
+      <p class="dim" style="font-size:1rem;margin-top:10px">
+        Each 2 through 6 counts <strong>+1</strong>, each 7, 8, 9 counts <strong>0</strong>,
+        and each 10, J, Q, K, A counts <strong>−1</strong>. A fresh shoe is balanced, so
+        a positive running count means the low cards are gone and the tens and aces are
+        still coming — good for you, because blackjacks pay 3:2 and the dealer busts
+        more often standing on stiffs.
+      </p>
+      <p class="dim" style="font-size:1rem">
+        Divide the running count by the decks still in the shoe and you get the
+        <strong>true count</strong>, which is the number that actually matters: +6 with
+        six decks left is barely anything, +6 with one deck left is a different game.
+      </p>
+      <p class="dim" style="font-size:1rem">
+        The best-known count-based deviations from basic strategy: take insurance at
+        true count ≥ +3, stand on 16 against a ten at ≥ 0, stand on 15 against a ten
+        at ≥ +4, and stand on 12 against a 3 at ≥ +2. This trainer grades you on plain
+        basic strategy plus the insurance decision — the rest are listed so you know
+        they exist.
+      </p>
+    </details>
+  </div>
+
+</section>
+
+<p class="faint mono" style="text-align:center;padding:10px 0 40px">
+  No wagering, no money, no accounts — the bankroll is a number in your browser tab.
+</p>
+
+</main>
+
+<script src="/js/site.js"></script>
+<script src="/js/strategy.js"></script>
+<script src="/js/blackjack.js"></script>
+</body>
+</html>

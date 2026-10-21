@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arnav Kasat</title>
+<meta name="description" content="Arnav Kasat — CS and Mathematics at Purdue. Distributed systems, storage engines, and quantitative finance. Plus a casino floor where the math is honest.">
+<meta property="og:title" content="Arnav Kasat">
+<meta property="og:description" content="Systems, quant, and the math underneath. Come for the resume, stay for the card counting.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://arnavkasat.com">
+<meta name="theme-color" content="#04140d">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/retro.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="/">♠ ARNAV KASAT</a>
+    <a href="#about">About</a>
+    <a href="#experience">Experience</a>
+    <a href="#projects">Projects</a>
+    <a href="#floor">Games</a>
+    <a href="#contact">Contact</a>
+    <button class="crt-toggle" id="crtBtn" type="button">CRT: on</button>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <div class="sign">
+    <div class="bulbs" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <p class="tag">♣ &nbsp;THE HOUSE OF&nbsp; ♦</p>
+    <h1>ARNAV KASAT</h1>
+    <p class="tag">♥ &nbsp;SYSTEMS &amp; PROBABILITY&nbsp; ♠</p>
+    <div class="bulbs" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+  </div>
+  <p class="sub">
+    Computer Science &amp; Mathematics at Purdue. I build things where correctness is
+    falsifiable — storage engines you can crash, ledgers that can't lose money,
+    and models that admit their own error bars.
+  </p>
+  <div class="controls" style="justify-content:center">
+    <a class="btn cyan" href="#floor">Enter the casino →</a>
+    <a class="btn" href="#experience">Read the resume</a>
+  </div>
+</header>
+
+<main>
+
+<section id="about" class="wrap">
+  <div class="section-head">
+    <span class="num">01</span><h2>The Dealer</h2><span class="rule"></span>
+  </div>
+  <div class="grid two">
+    <div class="panel">
+      <p>
+        I'm an undergraduate at <strong>Purdue University</strong>, studying
+        <strong>Computer Science and Mathematics</strong> with a minor in
+        <strong>Finance</strong>.
+      </p>
+      <p>
+        My work keeps landing in the same place: systems where a wrong answer is
+        expensive, and where you can prove you didn't give one. A key-value store
+        that survives a thousand <code>SIGKILL</code>s without losing an acknowledged
+        write. A payment ledger that stays zero-sum through 500 injected failures.
+        A matching engine held to a 9µs p99.
+      </p>
+      <p>
+        The other half is probability — market regimes, stochastic volatility,
+        reinforcement learning on portfolios. Which is also why this site is a
+        casino: it's the most honest place to show that I know where the edge sits,
+        and who it belongs to.
+      </p>
+    </div>
+    <div class="panel">
+      <h3 style="color:var(--neon-gold)">Coursework</h3>
+      <div class="pills" style="margin-bottom:18px">
+        <span class="pill">Design &amp; Analysis of Algorithms</span>
+        <span class="pill">Data Structures &amp; Algorithms</span>
+        <span class="pill">Systems Programming</span>
+        <span class="pill">Computer Architecture</span>
+        <span class="pill">Object Oriented Programming</span>
+        <span class="pill">Discrete Math</span>
+        <span class="pill">Probability</span>
+        <span class="pill">Linear Algebra</span>
+        <span class="pill">Introduction to AI</span>
+        <span class="pill">Machine Learning</span>
+      </div>
+      <h3 style="color:var(--neon-gold)">Off the clock</h3>
+      <p class="dim" style="margin:0">
+        Quantitative finance, algorithmic trading, probability theory, poker,
+        soccer, HYROX, and piano.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="experience" class="wrap">
+  <div class="section-head">
+    <span class="num">02</span><h2>Experience</h2><span class="rule"></span>
+  </div>
+
+  <div class="job">
+    <h3>Software Engineering Intern — AI Innovation Program</h3>
+    <p class="org">Capital One · Cloud Operations Resilience Engineering</p>
+    <p class="meta">May 2026 – Aug 2026 · McLean, VA</p>
+    <ul>
+      <li>Built an MCP server on ECS Fargate for 500+ users to query petabyte-scale telemetry, cutting triage time by 92%</li>
+      <li>Engineered a Spark Connect pipeline over an 889B-row Iceberg lake on EMR, routing multi-TB/day workloads</li>
+      <li>Enforced tenant isolation and blocked unauthorized LLM data access using RBAC and AWS STS credentials</li>
+      <li>Protected EMR with sub-100ms scan checks, partition filters, and query limits; shipped to production via CI/CD</li>
+    </ul>
+  </div>
+
+  <div class="job">
+    <h3>Undergraduate Researcher — Machine Learning &amp; Quantitative Finance</h3>
+    <p class="org">Purdue University</p>
+    <p class="meta">Jan 2024 – Present · West Lafayette, IN</p>
+    <ul>
+      <li>Developed an autoencoder-based coordinate system for S&amp;P 500 returns to identify latent market regimes</li>
+      <li>Modeled regime transitions using Dynamic Mode Decomposition and sparse latent equations through SINDy</li>
+      <li>Built a PyTorch, PyDMD, and PySINDy pipeline and authored a research paper on regime-based market modeling</li>
+    </ul>
+  </div>
+
+  <div class="job">
+    <h3>Software Engineering Intern</h3>
+    <p class="org">AlphaGeo</p>
+    <p class="meta">May 2025 – Aug 2025 · New York City, NY</p>
+    <ul>
+      <li>Built a Python pipeline to unify 100K+ BLM, USFS, and legislative land records using PostGIS, Pandas, and Shapely</li>
+      <li>Automated ingestion via REST APIs and LLM-based geocoding to standardize incomplete spatial records</li>
+      <li>Created dashboards and U.S. risk heat maps (Streamlit, PostGIS, Plotly) to surface high-privatization parcels</li>
+    </ul>
+  </div>
+
+  <div class="job">
+    <h3>Software Engineering Intern</h3>
+    <p class="org">PI Semiconductor</p>
+    <p class="meta">May 2024 – Jul 2024 · Dallas, TX</p>
+    <ul>
+      <li>Built an internal Python tool with an Excel-style UI (Tkinter, openpyxl) to streamline analog chip spec input</li>
+      <li>Structured and validated spec data using Pydantic and NumPy to generate Verilog-compatible simulation inputs</li>
+      <li>Automated ingestion into hardware validation flows, reducing simulation turnaround time by 4.6%</li>
+    </ul>
+  </div>
+
+  <div class="job">
+    <h3>Project Manager — Algorithmic Trading Team</h3>
+    <p class="org">ML@Purdue</p>
+    <p class="meta">Aug 2024 – Apr 2025 · West Lafayette, IN</p>
+    <ul>
+      <li>Led a 6-member team developing ETF arbitrage strategies using Heston stochastic volatility modeling</li>
+    </ul>
+  </div>
+
+  <div class="job">
+    <h3>Resident Assistant</h3>
+    <p class="org">Purdue University</p>
+    <p class="meta">Aug 2024 – Present · West Lafayette, IN</p>
+    <ul>
+      <li>Primary contact for dorm issues, mentor to 100+ residents, and organizer of community events</li>
+    </ul>
+  </div>
+</section>
+
+<section id="projects" class="wrap">
+  <div class="section-head">
+    <span class="num">03</span><h2>Projects</h2><span class="rule"></span>
+  </div>
+
+  <div class="grid two">
+
+    <article class="card">
+      <h3>lsmkv — Crash-Resilient LSM-Tree Storage Engine</h3>
+      <p class="stack">Rust · Linux · Criterion</p>
+      <ul>
+        <li>Embedded ordered key-value store written from the ground up: WAL, MemTables, SSTables, tombstones, atomically-swapped manifests</li>
+        <li>Bloom filters, sparse indexes, leveled compaction, and an LRU block cache cut read latency by 64%</li>
+        <li>Sustained 95K writes/sec and 62K reads/sec over 20GB with zero committed-write loss across 1,000 crash tests</li>
+        <li>No external crates in the library — CRC-32C, Bloom filter, LRU, block format, varints and PRNG all hand-rolled</li>
+      </ul>
+      <div class="links">
+        <a href="https://github.com/arnavkasat/Crash-Resilient-LSM-Tree-Storage-Engine" target="_blank" rel="noopener">Source →</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <h3>payment-engine — Idempotent Payment Engine</h3>
+      <p class="stack">Go · PostgreSQL · Kafka</p>
+      <ul>
+        <li>Concurrent Go payment engine on a double-entry PostgreSQL ledger, sustaining 2.1K TPS at 58ms p95</li>
+        <li>Idempotency keys, a transactional outbox, and Kafka consumers deduplicated 1M retries — exactly-once effects over at-least-once delivery</li>
+        <li>Held zero-sum ledger invariants across 500 injected failures, recovering in under 8 seconds</li>
+        <li>Ships an operator dashboard that arms failure injection at runtime and recomputes every invariant once a second</li>
+      </ul>
+      <div class="links">
+        <a href="https://github.com/arnavkasat/payment-engine" target="_blank" rel="noopener">Source →</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <h3>Hyrox Tracker</h3>
+      <p class="stack">Next.js · TypeScript · Supabase · Tailwind</p>
+      <ul>
+        <li>Training tracker for HYROX doubles — a 20-week plan generated from a race date, daily check-ins, and set-by-set logging</li>
+        <li>Apple Health ingest plus a weekly review that proposes plan changes you accept or reject</li>
+        <li>Row-level security on every table, magic-link auth, and an installable iOS PWA</li>
+      </ul>
+      <div class="links">
+        <a href="https://github.com/arnavkasat/hyrox-tracker" target="_blank" rel="noopener">Source →</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <h3>Matching Engine &amp; Limit Order Book</h3>
+      <p class="stack">C++17 · CMake · GoogleTest · Linux</p>
+      <ul>
+        <li>Matching engine with price-time priority, partial fills, cancellations, and order amendments</li>
+        <li>O(1) order lookup and O(log P) price-level updates via hash maps and FIFO price queues</li>
+        <li>Processed 750K orders/sec at 9µs p99 latency across 10M randomized order events</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <h3>Reinforcement Learning Portfolio Optimization</h3>
+      <p class="stack">PyTorch · QuantConnect</p>
+      <ul>
+        <li>Deep Q-Learning framework for dynamic asset allocation with adaptive portfolio weights</li>
+        <li>Tuned hyperparameters and risk-adjusted reward functions, reducing drawdowns by 15.4%</li>
+        <li>Validated on QuantConnect against real-time market data for a 23.7% higher Sharpe ratio</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <h3>Latent Market Regimes via DMD &amp; SINDy</h3>
+      <p class="stack">PyTorch · PyDMD · PySINDy</p>
+      <ul>
+        <li>Autoencoder coordinate system over S&amp;P 500 returns to surface latent market regimes</li>
+        <li>Regime transitions modeled with Dynamic Mode Decomposition and sparse governing equations</li>
+        <li>Research paper authored on regime-based market modeling</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <h3>Stochastic Volatility &amp; Dispersion Trading</h3>
+      <p class="stack">Python · Quantitative Modelling</p>
+      <ul>
+        <li>Dispersion strategy built on the Heston stochastic volatility model to capture option mispricing</li>
+        <li>Monte Carlo risk analysis plus an automated delta-neutral hedging system</li>
+        <li>Mispricing detection engine with broker API integration for execution-ready signals</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <h3>BoilerMate</h3>
+      <p class="stack">Python · CrewAI · ChromaDB · Streamlit</p>
+      <ul>
+        <li>Purdue AI assistant doing retrieval over course, grade, exam, and university resource data</li>
+        <li>BeautifulSoup pipelines ingested 13K+ course records and indexed grade distributions in ChromaDB</li>
+        <li>Role-based CrewAI agents sharing context in Streamlit for planning and resource discovery</li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+
+<section id="floor" class="wrap">
+  <div class="section-head">
+    <span class="num">04</span><h2>The Floor</h2><span class="rule"></span>
+  </div>
+  <p class="dim" style="max-width:62ch">
+    Four games, no fake math. Every edge, count, and probability on these tables is
+    computed from the real distribution — the blackjack trainer grades you against
+    published basic strategy and a true Hi-Lo count, and the roulette table shows you
+    exactly how much the house takes on each bet you place. Nothing here takes money.
+  </p>
+  <div class="grid two" style="margin-top:24px">
+
+    <article class="card">
+      <h3>♠ Blackjack — Count Trainer</h3>
+      <p class="stack">6-deck shoe · S17 · DAS · Hi-Lo</p>
+      <ul>
+        <li>Play real hands, then <strong>call the count</strong> and <strong>name the play</strong> — both graded against the true count and the basic-strategy table</li>
+        <li>Running count, true count, decks remaining, and your accuracy on both drills, live</li>
+      </ul>
+      <div class="links"><a class="btn sm cyan" href="/games/blackjack.html">Sit down →</a></div>
+    </article>
+
+    <article class="card">
+      <h3>♦ Roulette — The House Edge, Visible</h3>
+      <p class="stack">European &amp; American wheels</p>
+      <ul>
+        <li>Place any standard bet and see its exact payout, win probability, and expected value <em>before</em> you spin</li>
+        <li>Watch your realized return converge on −2.70% (or −5.26%) as the sample grows</li>
+      </ul>
+      <div class="links"><a class="btn sm cyan" href="/games/roulette.html">Place a bet →</a></div>
+    </article>
+
+    <article class="card">
+      <h3>♥ Odds Oracle</h3>
+      <p class="stack">Rapid-fire probability</p>
+      <ul>
+        <li>Cards, dice, coins, birthdays, Monty Hall — estimate the probability, get scored on how close you were</li>
+        <li>Every answer comes with the derivation, not just the number</li>
+      </ul>
+      <div class="links"><a class="btn sm cyan" href="/games/odds.html">Take a guess →</a></div>
+    </article>
+
+    <article class="card">
+      <h3>♣ Pickleball — Retro Sim</h3>
+      <p class="stack">Canvas · rally scoring to 11</p>
+      <ul>
+        <li>CRT-green pickleball with a real kitchen line: volley inside it and you lose the rally</li>
+        <li>Mouse, touch, or arrow keys. Three difficulty settings, best of one.</li>
+      </ul>
+      <div class="links"><a class="btn sm cyan" href="/games/pickleball.html">Serve →</a></div>
+    </article>
+
+  </div>
+</section>
+
+<section id="skills" class="wrap">
+  <div class="section-head">
+    <span class="num">05</span><h2>Technical Skills</h2><span class="rule"></span>
+  </div>
+  <div class="grid two">
+    <div class="panel">
+      <h3 style="color:var(--neon-gold)">Languages</h3>
+      <div class="pills">
+        <span class="pill">Python</span><span class="pill">C / C++</span><span class="pill">Rust</span>
+        <span class="pill">Go</span><span class="pill">Java</span><span class="pill">TypeScript</span>
+        <span class="pill">JavaScript</span><span class="pill">SQL</span><span class="pill">Scala</span>
+        <span class="pill">CUDA</span><span class="pill">R</span><span class="pill">Bash</span>
+        <span class="pill">HTML / CSS</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 style="color:var(--neon-gold)">Cloud &amp; Infrastructure</h3>
+      <div class="pills">
+        <span class="pill">AWS ECS / Fargate</span><span class="pill">EMR</span><span class="pill">STS</span>
+        <span class="pill">CloudWatch</span><span class="pill">GCP Cloud Run</span><span class="pill">Cloud SQL</span>
+        <span class="pill">Docker</span><span class="pill">Linux</span><span class="pill">CI/CD</span>
+        <span class="pill">GitHub Actions</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 style="color:var(--neon-gold)">Data &amp; AI Systems</h3>
+      <div class="pills">
+        <span class="pill">Spark</span><span class="pill">Iceberg</span><span class="pill">Kafka</span>
+        <span class="pill">PostgreSQL</span><span class="pill">PostGIS</span><span class="pill">MCP</span>
+        <span class="pill">FastAPI</span><span class="pill">Pydantic</span><span class="pill">PyTorch</span>
+        <span class="pill">ChromaDB</span><span class="pill">TensorFlow</span><span class="pill">Scikit-learn</span>
+        <span class="pill">XGBoost</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 style="color:var(--neon-gold)">Frameworks &amp; Libraries</h3>
+      <div class="pills">
+        <span class="pill">React</span><span class="pill">Next.js</span><span class="pill">Node.js</span>
+        <span class="pill">Flask</span><span class="pill">Streamlit</span><span class="pill">Supabase</span>
+        <span class="pill">Pandas</span><span class="pill">NumPy</span><span class="pill">Matplotlib</span>
+        <span class="pill">Plotly</span><span class="pill">Shapely</span><span class="pill">Git</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="wrap">
+  <div class="section-head">
+    <span class="num">06</span><h2>Cash Out</h2><span class="rule"></span>
+  </div>
+  <div class="panel" style="text-align:center">
+    <p class="dim" style="max-width:52ch;margin:0 auto 20px">
+      Open to software engineering and quantitative internships. The fastest way to
+      reach me is email.
+    </p>
+    <div class="controls" style="justify-content:center">
+      <a class="btn" href="mailto:mail.arnavkasat@gmail.com">Email</a>
+      <a class="btn pink" href="https://linkedin.com/in/arnavkasat/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn cyan" href="https://github.com/arnavkasat" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="bulbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <p>♠ ♥ ♣ ♦ &nbsp;&nbsp;The house always has an edge. Here it's just arithmetic.&nbsp;&nbsp; ♦ ♣ ♥ ♠</p>
+  <p class="faint mono">arnavkasat.com — hand-written HTML, CSS, and JavaScript. No build step, no trackers.</p>
+</footer>
+
+<script src="/js/site.js"></script>
+</body>
+</html>

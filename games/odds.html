@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odds Oracle — Arnav Kasat</title>
+<meta name="description" content="Sixteen probability questions from cards, dice, coins and roulette. Estimate the number, get scored on how close you were, and see the derivation.">
+<meta name="theme-color" content="#04140d">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/retro.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="/">♠ ARNAV KASAT</a>
+    <a href="/#floor">← The Floor</a>
+    <a href="/games/blackjack.html">Blackjack</a>
+    <a href="/games/roulette.html">Roulette</a>
+    <a href="/games/pickleball.html">Pickleball</a>
+    <button class="crt-toggle" id="crtBtn" type="button">CRT: on</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section style="padding-bottom:18px">
+  <div class="section-head">
+    <span class="num">♥</span><h2>Odds Oracle</h2><span class="rule"></span>
+  </div>
+  <p class="dim" style="max-width:68ch">
+    Sixteen questions about cards, dice, coins, wheels and birthdays. Commit to a
+    number before you see the answer — estimating probabilities is a skill, and the
+    only way to know whether you have it is to be scored. Every answer comes with
+    the combinatorics it falls out of.
+  </p>
+</section>
+
+<div class="readout" style="margin-bottom:22px">
+  <div class="stat"><span class="k">Answered</span><span class="v" id="asked">0</span></div>
+  <div class="stat"><span class="k">Mean error</span><span class="v cyan" id="avgErr">—</span></div>
+  <div class="stat"><span class="k">Within 1 point</span><span class="v gold" id="sharpCount">—</span></div>
+</div>
+
+<div class="table-felt q-card">
+  <p class="q-text" id="qText"></p>
+
+  <label class="field" style="max-width:420px;margin:0 auto 10px">
+    <span>Your estimate, in percent</span>
+    <input type="number" id="guess" min="0" max="100" step="0.01" placeholder="e.g. 4.83" style="max-width:none">
+  </label>
+  <div class="q-meter">
+    <input type="range" id="slider" min="0" max="100" step="0.5" value="50" style="max-width:none" aria-label="Estimate slider">
+  </div>
+
+  <div class="controls" style="justify-content:center">
+    <button class="btn" id="btnLock" type="button">Lock it in</button>
+    <button class="btn cyan" id="btnNext" type="button" disabled>Next question</button>
+  </div>
+
+  <p class="q-answer" id="verdict" style="margin-top:18px;min-height:2.6em"></p>
+  <p class="q-answer" id="answer" style="font-size:1.7rem;margin:0"></p>
+
+  <div class="q-why" id="why" style="display:none">
+    <p style="margin:0"></p>
+    <code class="mono" id="formula"></code>
+  </div>
+</div>
+
+<section class="grid two" style="padding-top:26px">
+  <div class="panel">
+    <h3 style="color:var(--neon-cyan)">Your answers</h3>
+    <div class="log" id="log"></div>
+  </div>
+  <div class="panel">
+    <h3 style="color:var(--neon-gold)">Scoring</h3>
+    <p class="dim" style="font-size:1.05rem">
+      Within <strong>1 percentage point</strong> is sharp, within 5 is close, within 15
+      is off, and beyond that is way off. Mean error is the average absolute distance
+      across every question you've answered — the single number worth watching.
+    </p>
+    <p class="dim" style="font-size:1.05rem">
+      Most people are badly calibrated in one specific direction: they overestimate
+      rare events and underestimate compound ones. Four rolls of a die feel like they
+      should produce a six more often than 52% of the time; twenty-three people feel
+      like far too few for a shared birthday. Both intuitions are wrong, and the
+      derivations show why.
+    </p>
+  </div>
+</section>
+
+<p class="faint mono" style="text-align:center;padding:10px 0 40px">
+  No wagering, no money, no accounts.
+</p>
+
+</main>
+
+<script src="/js/site.js"></script>
+<script src="/js/odds.js"></script>
+</body>
+</html>
