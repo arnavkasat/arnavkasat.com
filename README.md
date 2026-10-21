@@ -56,10 +56,16 @@ would grade both of those wrong against these S17 rules. The test caught a third
 bug on its first run — a pair of aces that can't be split is a soft 12 and must
 be hit, and the code was standing on it.
 
-`api/test.js` runs the leaderboard endpoint against an in-memory stand-in for
-Upstash: ordering in both directions, keeping a name's best rather than its
-latest, the validation and rate limits, and that the sorted set gets trimmed
-rather than growing forever.
+`test/api.test.js` runs the leaderboard endpoint twice, once against an
+in-memory stand-in for Upstash's REST API and once against a real
+`redis-server` over TCP, so the hand-rolled RESP client is held to exactly the
+same behaviour as the REST path instead of being taken on trust. Both runs
+check ordering in each direction, that a name keeps its best result rather than
+its latest, the validation and rate limits, and that the sorted set is trimmed
+rather than growing forever. The protocol itself is covered separately: partial
+buffers, nil and empty bulk strings, nested arrays, multibyte payloads, a reply
+split across packets, a bad password, and a Redis-side error. If
+`redis-server` is not installed the TCP half is skipped and says so.
 
 ## The games
 
@@ -100,10 +106,19 @@ not — there is no skill in roulette to rank, which is rather the point of that
 page.
 
 `api/scores.js` is a single Vercel function backed by a Redis sorted set per
-game, reached over Upstash's REST API with plain `fetch`, so the project still
-has no dependencies and no build step. It accepts either the `KV_REST_API_*` or
-the `UPSTASH_REDIS_REST_*` variable names, since the Vercel integration has used
-both.
+game. The Vercel Marketplace hands out two different kinds of Redis, so it
+speaks both and uses whichever the project is connected to:
+
+| Provider | Variables | How it is reached |
+| --- | --- | --- |
+| Upstash | `KV_REST_API_URL` / `UPSTASH_REDIS_REST_URL` + token | HTTP REST, via `fetch` |
+| Redis Cloud and friends | `REDIS_URL` (`redis://` or `rediss://`) | TCP, speaking RESP |
+
+The TCP client is about forty lines at the bottom of that file rather than a
+dependency — RESP is a small, self-describing protocol, so the project still
+installs nothing and builds nothing. One connection per invocation:
+authenticate, pipeline every command, read the replies, close. A serverless
+function cannot hold a pool between invocations anyway.
 
 With no Redis connected the endpoint answers `200` with `configured: false`,
 and the pages fall back to a personal best held in the browser. Missing

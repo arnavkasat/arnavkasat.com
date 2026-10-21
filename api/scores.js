@@ -1,15 +1,22 @@
 /* ===========================================================
    /api/scores — the shared leaderboard.
 
-   Storage is a Redis sorted set per game, held in whatever
-   Redis the Vercel project is connected to. Talked to over
-   Upstash's REST API with plain fetch, so this file has no
-   dependencies and the project still needs no build step.
+   Storage is a Redis sorted set per game. Two kinds of Redis
+   get handed out by the Vercel Marketplace and this speaks
+   both, picking whichever the project is connected to:
 
-   The Vercel integration has injected these variables under
-   two different names over the years, so both are accepted.
-   With neither set the endpoint reports itself unconfigured
-   and the site falls back to a local-only personal best.
+     - Upstash, which exposes an HTTP REST endpoint
+       (KV_REST_API_* or UPSTASH_REDIS_REST_*)
+     - Redis Cloud and friends, which expose an ordinary TCP
+       endpoint (REDIS_URL / redis://user:pass@host:port)
+
+   The TCP client is forty lines of RESP at the bottom of this
+   file rather than a dependency, so the project still installs
+   nothing and builds nothing.
+
+   With neither configured the endpoint reports itself
+   unconfigured and the site falls back to a local-only
+   personal best.
 
      GET  /api/scores?game=blackjack      top ten
      GET  /api/scores?game=all            top five of each
@@ -23,15 +30,30 @@
 
 'use strict';
 
-var REDIS_URL =
-  process.env.KV_REST_API_URL ||
-  process.env.UPSTASH_REDIS_REST_URL ||
-  process.env.REDIS_REST_URL;
+var net = require('net');
+var tls = require('tls');
+var url = require('url');
 
-var REDIS_TOKEN =
-  process.env.KV_REST_API_TOKEN ||
-  process.env.UPSTASH_REDIS_REST_TOKEN ||
-  process.env.REDIS_REST_TOKEN;
+function restCreds() {
+  var u = process.env.KV_REST_API_URL ||
+          process.env.UPSTASH_REDIS_REST_URL ||
+          process.env.REDIS_REST_URL;
+  var t = process.env.KV_REST_API_TOKEN ||
+          process.env.UPSTASH_REDIS_REST_TOKEN ||
+          process.env.REDIS_REST_TOKEN;
+  return u && t ? { url: u, token: t } : null;
+}
+
+function tcpUrl() {
+  return process.env.REDIS_URL ||
+         process.env.REDIS_URI ||
+         process.env.KV_URL ||
+         null;
+}
+
+function configured() {
+  return !!(restCreds() || tcpUrl());
+}
 
 // Per game: which direction wins, the plausible range of a real result,
 // and the minimum effort before a score may be posted at all.
@@ -45,18 +67,31 @@ var TOP_N = 10;
 var KEEP = 50;              // trim the sorted set to this many entries
 var RATE_PER_MIN = 20;
 
-function redis(commands) {
-  var single = !Array.isArray(commands[0]);
-  return fetch(REDIS_URL + (single ? '' : '/pipeline'), {
+// Run a list of commands and return their results in order. Both backends
+// answer the same shape so nothing above here has to know which is in use.
+function exec(commands) {
+  var rest = restCreds();
+  return rest ? execRest(rest, commands) : execTcp(tcpUrl(), commands);
+}
+
+function execRest(rest, commands) {
+  var single = commands.length === 1;
+  return fetch(rest.url + (single ? '' : '/pipeline'), {
     method: 'POST',
     headers: {
-      Authorization: 'Bearer ' + REDIS_TOKEN,
+      Authorization: 'Bearer ' + rest.token,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(commands)
+    body: JSON.stringify(single ? commands[0] : commands)
   }).then(function (r) {
-    if (!r.ok) throw new Error('redis ' + r.status);
+    if (!r.ok) throw new Error('redis rest ' + r.status);
     return r.json();
+  }).then(function (body) {
+    var list = single ? [body] : body;
+    return list.map(function (entry) {
+      if (entry && entry.error) throw new Error(entry.error);
+      return entry.result;
+    });
   });
 }
 
@@ -113,8 +148,8 @@ function readBoard(game, limit) {
   var range = cfg.better === 'higher'
     ? ['ZRANGE', 'lb:' + game, '0', String(limit - 1), 'REV', 'WITHSCORES']
     : ['ZRANGE', 'lb:' + game, '0', String(limit - 1), 'WITHSCORES'];
-  return redis([range, ['HGETALL', 'lb:' + game + ':meta']]).then(function (res) {
-    return rows(res[0].result || [], metaMap(res[1].result || []));
+  return exec([range, ['HGETALL', 'lb:' + game + ':meta']]).then(function (res) {
+    return rows(res[0] || [], metaMap(res[1] || []));
   });
 }
 
@@ -123,7 +158,7 @@ module.exports = async function handler(req, res) {
 
   // No store connected is a known state the site handles, not a failure, so
   // it answers 200 rather than printing a red error in everyone's console.
-  if (!REDIS_URL || !REDIS_TOKEN) {
+  if (!configured()) {
     res.status(200).json({
       ok: true,
       configured: false,
@@ -198,8 +233,8 @@ module.exports = async function handler(req, res) {
 
     // One IP should not be able to rewrite the whole board in a loop.
     var ip = String(req.headers['x-forwarded-for'] || 'unknown').split(',')[0].trim();
-    var rl = await redis([['INCR', 'rl:' + ip], ['EXPIRE', 'rl:' + ip, '60']]);
-    if (Number(rl[0].result) > RATE_PER_MIN) {
+    var rl = await exec([['INCR', 'rl:' + ip], ['EXPIRE', 'rl:' + ip, '60']]);
+    if (Number(rl[0]) > RATE_PER_MIN) {
       res.status(429).json({ ok: false, error: 'Easy — too many submissions. Try again in a minute.' });
       return;
     }
@@ -208,10 +243,10 @@ module.exports = async function handler(req, res) {
     var key = 'lb:' + g;
     // GT / LT keep a name's best result rather than its most recent one.
     var keep = cfg.better === 'higher' ? 'GT' : 'LT';
-    var before = await redis(['ZSCORE', key, name]);
-    var prev = before.result === null ? null : Number(before.result);
+    var before = await exec([['ZSCORE', key, name]]);
+    var prev = before[0] === null || before[0] === undefined ? null : Number(before[0]);
 
-    await redis([
+    await exec([
       ['ZADD', key, keep, 'CH', String(score), name],
       ['HSET', key + ':meta', name, JSON.stringify(detail)],
       cfg.better === 'higher'
@@ -233,3 +268,126 @@ module.exports = async function handler(req, res) {
     res.status(500).json({ ok: false, error: 'Leaderboard unavailable.' });
   }
 };
+
+/* ===========================================================
+   A small RESP client.
+
+   Redis speaks a simple, self-describing protocol: '+' simple
+   string, '-' error, ':' integer, '$' bulk string, '*' array,
+   each terminated by CRLF. That is the whole grammar, which is
+   why this is forty lines instead of a dependency.
+
+   One connection per invocation: authenticate, send every
+   command at once, read the same number of replies back, close.
+   For a leaderboard on a personal site that is cheaper than
+   anything clever, and a serverless function cannot hold a
+   pool between invocations anyway.
+   =========================================================== */
+
+var TCP_TIMEOUT = 5000;
+
+function encode(args) {
+  var out = '*' + args.length + '\r\n';
+  for (var i = 0; i < args.length; i++) {
+    var v = String(args[i]);
+    out += '$' + Buffer.byteLength(v) + '\r\n' + v + '\r\n';
+  }
+  return out;
+}
+
+// Returns [value, nextOffset], or null when the buffer holds a partial reply.
+function decode(buf, i) {
+  if (i >= buf.length) return null;
+  var type = buf[i];
+  var end = buf.indexOf('\r\n', i, 'utf8');
+  if (end === -1) return null;
+  var line = buf.toString('utf8', i + 1, end);
+  var next = end + 2;
+
+  if (type === 43) return [line, next];                 // '+'
+  if (type === 45) return [new Error(line), next];      // '-'
+  if (type === 58) return [Number(line), next];         // ':'
+
+  if (type === 36) {                                    // '$'
+    var len = Number(line);
+    if (len === -1) return [null, next];
+    if (buf.length < next + len + 2) return null;
+    return [buf.toString('utf8', next, next + len), next + len + 2];
+  }
+
+  if (type === 42) {                                    // '*'
+    var n = Number(line);
+    if (n === -1) return [null, next];
+    var arr = [], at = next;
+    for (var k = 0; k < n; k++) {
+      var item = decode(buf, at);
+      if (!item) return null;
+      arr.push(item[0]);
+      at = item[1];
+    }
+    return [arr, at];
+  }
+  return null;
+}
+
+function execTcp(urlString, commands) {
+  return new Promise(function (resolve, reject) {
+    var parsed;
+    try { parsed = new url.URL(urlString); } catch (e) { reject(new Error('bad REDIS_URL')); return; }
+
+    var secure = parsed.protocol === 'rediss:';
+    var user = decodeURIComponent(parsed.username || '');
+    var pass = decodeURIComponent(parsed.password || '');
+    var opts = {
+      host: parsed.hostname,
+      port: Number(parsed.port || 6379)
+    };
+    if (secure) opts.servername = parsed.hostname;
+
+    var wire = [];
+    // AUTH first when the server wants it; its reply is read and discarded.
+    if (pass) wire.push(user ? ['AUTH', user, pass] : ['AUTH', pass]);
+    var skip = wire.length;
+    wire = wire.concat(commands);
+
+    var socket = secure ? tls.connect(opts) : net.connect(opts);
+    var chunks = [];
+    var done = false;
+
+    function finish(err, value) {
+      if (done) return;
+      done = true;
+      socket.destroy();
+      err ? reject(err) : resolve(value);
+    }
+
+    socket.setTimeout(TCP_TIMEOUT, function () { finish(new Error('redis timeout')); });
+    socket.on('error', function (e) { finish(e); });
+    socket.on('close', function () { finish(new Error('redis closed early')); });
+
+    socket.on(secure ? 'secureConnect' : 'connect', function () {
+      socket.write(wire.map(encode).join(''));
+    });
+
+    socket.on('data', function (chunk) {
+      chunks.push(chunk);
+      var buf = Buffer.concat(chunks);
+      var out = [], at = 0;
+      for (var i = 0; i < wire.length; i++) {
+        var r = decode(buf, at);
+        if (!r) return;                 // wait for the rest of the stream
+        out.push(r[0]);
+        at = r[1];
+      }
+      var replies = out.slice(skip);
+      for (var j = 0; j < replies.length; j++) {
+        if (replies[j] instanceof Error) { finish(replies[j]); return; }
+      }
+      if (out[0] instanceof Error) { finish(out[0]); return; }   // AUTH failed
+      finish(null, replies);
+    });
+  });
+}
+
+// Exposed for the tests; not part of the request path.
+module.exports.__resp = { encode: encode, decode: decode, execTcp: execTcp };
