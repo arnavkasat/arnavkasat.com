@@ -570,4 +570,22 @@
 
   buildShoe();
   render();
+  if (window.LB) {
+    LB.attach({
+      game: 'blackjack',
+      read: function () {
+        return {
+          score: S.decisions ? 100 * S.decisionsRight / S.decisions : 0,
+          eligible: S.decisions >= 50,
+          need: 'Play ' + Math.max(0, 50 - S.decisions) +
+                ' more graded decisions to post a score.',
+          detail: {
+            decisions: S.decisions,
+            count: S.countCalls ? Math.round(100 * S.countRight / S.countCalls) : 0
+          }
+        };
+      }
+    });
+  }
+
 })();

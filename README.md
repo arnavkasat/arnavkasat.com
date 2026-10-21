@@ -12,17 +12,22 @@ theme that faked its own math would be a strange thing for me to ship.
 
 ```
 .
-├── index.html              resume, projects, links
+├── index.html              resume, projects, links, hall of fame
 ├── css/retro.css           the whole theme: neon, felt, CRT, layout
+├── api/scores.js           leaderboard endpoint (the only server-side code)
 ├── js/
 │   ├── site.js             CRT toggle, nav highlighting
 │   ├── strategy.js         blackjack chart + hand arithmetic (tested)
 │   ├── blackjack.js        shoe, dealing, splits, insurance, grading
 │   ├── roulette.js         bet pricing, spins, Monte Carlo
 │   ├── odds.js             probability questions and derivations
-│   └── pickleball.js       court geometry, physics, rules, opponent AI
+│   ├── pickleball.js       court geometry, physics, rules, opponent AI
+│   └── leaderboard.js      shared board client
 ├── games/                  one page per game
-└── test/strategy.test.js   324 assertions, no dependencies
+└── test/
+    ├── strategy.test.js    324 assertions on the blackjack chart
+    ├── api.test.js         32 assertions on the leaderboard endpoint
+    └── fake-redis.js       in-memory stand-in so the API tests need no network
 ```
 
 ## Running it
@@ -37,10 +42,10 @@ so that the games in `/games/` share one copy of everything.
 ## Tests
 
 ```sh
-node test/strategy.test.js      # or: npm test
+npm test
 ```
 
-The blackjack strategy chart is checked cell by cell — every player hand against
+Two suites, no framework and no network. The blackjack strategy chart is checked cell by cell — every player hand against
 every dealer upcard, hard totals, soft totals and pairs, plus the hand arithmetic
 and the Hi-Lo tags. 324 assertions, no test framework.
 
@@ -50,6 +55,11 @@ played differently when the dealer hits soft 17. A chart copied from an H17 game
 would grade both of those wrong against these S17 rules. The test caught a third
 bug on its first run — a pair of aces that can't be split is a soft 12 and must
 be hit, and the code was standing on it.
+
+`api/test.js` runs the leaderboard endpoint against an in-memory stand-in for
+Upstash: ordering in both directions, keeping a name's best rather than its
+latest, the validation and rate limits, and that the sorted set gets trimmed
+rather than growing forever.
 
 ## The games
 
@@ -83,10 +93,36 @@ solving for the velocity that lands it on a chosen spot, which is what keeps
 shots inside the lines; catching the ball off the edge of the paddle is what
 sends them wide. Rally scoring to 11, win by 2.
 
+## Leaderboard
+
+Blackjack, Odds Oracle and pickleball post to a shared board. Roulette does
+not — there is no skill in roulette to rank, which is rather the point of that
+page.
+
+`api/scores.js` is a single Vercel function backed by a Redis sorted set per
+game, reached over Upstash's REST API with plain `fetch`, so the project still
+has no dependencies and no build step. It accepts either the `KV_REST_API_*` or
+the `UPSTASH_REDIS_REST_*` variable names, since the Vercel integration has used
+both.
+
+With no Redis connected the endpoint answers `200` with `configured: false`,
+and the pages fall back to a personal best held in the browser. Missing
+infrastructure makes the site quieter, never broken.
+
+One entry per name per game: a better result replaces that name's previous one.
+Names are restricted to letters, digits and a few punctuation marks, capped at
+16 characters, and screened against a small blocklist, because they land on a
+public page. Submissions are rate limited per IP.
+
+Scores are reported by the browser and can therefore be forged by anyone who
+opens devtools. The bounds and gates in `api/scores.js` stop casual nonsense,
+not a determined person. It is a scoreboard among friends, not evidence. Entries
+can be deleted from the Upstash console if someone abuses it.
+
 ## Deployment
 
-Static files from the repository root, deployed on Vercel, pointed at
-`arnavkasat.com`. There is nothing to build and no server to run.
+Static files from the repository root plus the one function in `api/`, deployed
+on Vercel, pointed at `arnavkasat.com`. There is nothing to build.
 
 ## License
 

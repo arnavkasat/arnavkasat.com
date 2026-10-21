@@ -4,7 +4,7 @@
   "private": true,
   "description": "Personal site — a retro casino floor where the math is honest.",
   "scripts": {
-    "test": "node test/strategy.test.js",
+    "test": "node test/strategy.test.js && node test/api.test.js",
     "dev": "python3 -m http.server 8787"
   },
   "license": "MIT"

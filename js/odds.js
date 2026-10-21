@@ -232,4 +232,18 @@
 
   S.order = shuffle(QUESTIONS.length);
   show();
+  if (window.LB) {
+    LB.attach({
+      game: 'odds',
+      read: function () {
+        return {
+          score: S.asked ? S.errSum / S.asked : 0,
+          eligible: S.asked >= 16,
+          need: 'Answer ' + Math.max(0, 16 - S.asked) + ' more to post a score.',
+          detail: { answered: S.asked, sharp: S.sharp }
+        };
+      }
+    });
+  }
+
 })();

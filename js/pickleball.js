@@ -585,4 +585,22 @@
   G.message = 'Your serve — press space or tap the court';
   paintStatus();
   requestAnimationFrame(frame);
+  if (window.LB) {
+    LB.attach({
+      game: 'pickleball',
+      read: function () {
+        return {
+          score: G.longest,
+          eligible: G.longest >= 1,
+          need: 'Win a rally to post a score.',
+          detail: {
+            rallies: G.longest,
+            level: G.level,
+            result: G.scoreYou + '-' + G.scoreCpu
+          }
+        };
+      }
+    });
+  }
+
 })();
