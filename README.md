@@ -6,8 +6,8 @@ and open `index.html` and it works.
 
 The conceit is not decoration. Every game on the floor is mathematically honest:
 the blackjack trainer grades you against the basic-strategy table for its exact
-rules, the roulette table prints the expected value of your bet before you spin,
-and the probability quiz shows the combinatorics behind every answer. A casino
+rules, the parity table scores you on finding arbitrage in a real options
+identity, and the probability quiz shows the combinatorics behind every answer. A casino
 theme that faked its own math would be a strange thing for me to ship.
 
 ```
@@ -19,14 +19,16 @@ theme that faked its own math would be a strange thing for me to ship.
 │   ├── site.js             CRT toggle, nav highlighting
 │   ├── strategy.js         blackjack chart + hand arithmetic (tested)
 │   ├── blackjack.js        shoe, dealing, splits, insurance, grading
-│   ├── roulette.js         bet pricing, spins, Monte Carlo
+│   ├── parity-math.js      Black-Scholes and put-call parity (tested)
+│   ├── parity.js           the arbitrage game
 │   ├── odds.js             probability questions and derivations
 │   ├── pickleball.js       court geometry, physics, rules, opponent AI
 │   └── leaderboard.js      shared board client
 ├── games/                  one page per game
 └── test/
     ├── strategy.test.js    324 assertions on the blackjack chart
-    ├── api.test.js         32 assertions on the leaderboard endpoint
+    ├── parity.test.js      38 assertions on the options maths
+    ├── api.test.js         88 assertions on the leaderboard endpoint
     └── fake-redis.js       in-memory stand-in so the API tests need no network
 ```
 
@@ -45,7 +47,7 @@ so that the games in `/games/` share one copy of everything.
 npm test
 ```
 
-Two suites, no framework and no network. The blackjack strategy chart is checked cell by cell — every player hand against
+Three suites, no framework and no network. The blackjack strategy chart is checked cell by cell — every player hand against
 every dealer upcard, hard totals, soft totals and pairs, plus the hand arithmetic
 and the Hi-Lo tags. 324 assertions, no test framework.
 
@@ -78,14 +80,19 @@ not when it is dealt — and you can call the count at any time, or have the gam
 demand it between hands. Insurance is graded separately against the true count,
 since it is the one decision where counting changes the answer outright.
 
-**Roulette.** Every bet is priced before the wheel turns: pockets covered, win
-probability, payout, and expected value. They all come to −2.70% on the
-single-zero wheel and −5.26% on the double-zero wheel, because the payouts are
-set as if there were 36 pockets and there are 37 or 38. The Monte Carlo button
-runs the same layout thousands of times to show the realized return settling onto
-that number. It deliberately does not touch the bankroll: $15 a spin for ten
-thousand spins busts a $1,000 stack long before the average shows up, which is
-gambler's ruin — a real lesson, but a different one.
+**The parity table.** For European options on a non-dividend-paying stock,
+`C - P = S - K*exp(-rT)`. A long call and a short put at one strike are the
+stock bought on credit, so the two sides must cost the same or the difference
+is free money. A quote board appears and you call whether parity holds on it,
+and if not, which side is rich; a called board then shows the identity with its
+own numbers in it and the four-leg conversion or reversal that collects the gap.
+
+The quotes are generated with Black-Scholes so the board reads like a real one,
+but nothing being scored depends on it. Parity is model-free — it holds whatever
+volatility is and whether or not Black-Scholes is true — which makes it the same
+kind of claim as a ledger that must sum to zero or a write that must survive a
+crash. That is why it replaced a roulette table here: roulette has no decision
+in it to get right.
 
 **Odds Oracle.** Sixteen probability questions. Commit to a number, get scored on
 the absolute error, and see the derivation. The values are exact, computed from
@@ -101,9 +108,7 @@ sends them wide. Rally scoring to 11, win by 2.
 
 ## Leaderboard
 
-Blackjack, Odds Oracle and pickleball post to a shared board. Roulette does
-not — there is no skill in roulette to rank, which is rather the point of that
-page.
+All four games post to a shared board.
 
 `api/scores.js` is a single Vercel function backed by a Redis sorted set per
 game. The Vercel Marketplace hands out two different kinds of Redis, so it
