@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Parity Table — Arnav Kasat</title>
+<meta name="description" content="Spot the arbitrage: a quote board appears, you call whether put-call parity holds on it, and the table shows you the identity and the trade.">
+<meta name="theme-color" content="#04140d">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/retro.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="/">♠ ARNAV KASAT</a>
+    <a href="/#floor">← The Floor</a>
+    <a href="/games/blackjack.html">Blackjack</a>
+    <a href="/games/odds.html">Odds Oracle</a>
+    <a href="/games/pickleball.html">Pickleball</a>
+    <button class="crt-toggle" id="crtBtn" type="button">CRT: on</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section style="padding-bottom:18px">
+  <div class="section-head">
+    <span class="num">♦</span><h2>The Parity Table</h2><span class="rule"></span>
+  </div>
+  <p class="dim" style="max-width:68ch">
+    A quote board comes up. Say whether put-call parity holds on it — and if it
+    doesn't, which side is rich. Every board is either fair or has one leg moved
+    far enough to be worth taking, and after you call it you get the identity,
+    the gap, and the exact four-leg trade that collects it.
+  </p>
+</section>
+
+<div class="readout" style="margin-bottom:22px">
+  <div class="stat"><span class="k">Boards called</span><span class="v" id="roundCount">0</span></div>
+  <div class="stat"><span class="k">Accuracy</span><span class="v cyan" id="accuracy">—</span></div>
+  <div class="stat"><span class="k">Streak</span><span class="v gold" id="streakNow">0</span></div>
+  <div class="stat"><span class="k">Best streak</span><span class="v pink" id="streakBest">0</span></div>
+</div>
+
+<div class="table-felt">
+  <p class="mono faint" style="margin:0 0 12px">EUROPEAN OPTIONS · NO DIVIDENDS · SAME STRIKE, SAME EXPIRY</p>
+
+  <div class="parity-board">
+    <div class="quote"><span class="k">Stock</span><span class="v" id="stock">—</span></div>
+    <div class="quote"><span class="k">Strike</span><span class="v" id="strike">—</span></div>
+    <div class="quote"><span class="k">Expiry</span><span class="v" id="expiry">—</span></div>
+    <div class="quote"><span class="k">Rate</span><span class="v" id="rate">—</span></div>
+    <div class="quote call"><span class="k">Call</span><span class="v" id="callPx">—</span></div>
+    <div class="quote put"><span class="k">Put</span><span class="v" id="putPx">—</span></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="btnHold" type="button">Parity holds <span class="faint">(1)</span></button>
+    <button class="btn pink" id="btnRich" type="button">Call side rich <span class="faint">(2)</span></button>
+    <button class="btn cyan" id="btnCheap" type="button">Call side cheap <span class="faint">(3)</span></button>
+    <button class="btn" id="btnNext" type="button" disabled>Next board <span class="faint">(space)</span></button>
+  </div>
+
+  <p class="parity-verdict" id="verdictLine"></p>
+  <div class="parity-workings" id="workings" style="display:none"></div>
+  <div class="parity-trade" id="trade" style="display:none"></div>
+</div>
+
+<section class="grid two" style="padding-top:26px">
+
+  <div class="panel" data-leaderboard data-game="parity"></div>
+
+  <div class="panel">
+    <h3 style="color:var(--neon-cyan)">Your calls</h3>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="panel" style="grid-column:1/-1">
+    <h3 style="color:var(--neon-gold)">Why this is the one table the house can't win</h3>
+    <p class="dim" style="font-size:1.05rem">
+      Buy a call and sell a put at the same strike and expiry, and whatever the stock
+      does you end up owning it at <em>K</em>. That is the stock, bought on credit. So
+      the two must cost the same today:
+    </p>
+    <p class="mono" style="color:var(--neon-cyan);text-align:center;font-size:0.8rem">
+      C − P = S − K·e<sup>−rT</sup>
+    </p>
+    <p class="dim" style="font-size:1.05rem">
+      Nothing in that line is a forecast. It does not care what volatility is, what
+      the stock is likely to do, or whether Black–Scholes is true. If the two sides
+      disagree by more than it costs to trade, you take the difference and hold a
+      position that nets to exactly zero at expiry — which is why, in a real market,
+      they don't disagree for long.
+    </p>
+    <p class="dim" style="font-size:1.05rem">
+      When the call side is <strong>rich</strong> you sell the call, buy the put, buy
+      the stock, and borrow the discounted strike — a <em>conversion</em>. When it's
+      <strong>cheap</strong> you do the reverse and lend instead — a <em>reversal</em>.
+      Either way the gap is yours on day one.
+    </p>
+    <p class="dim" style="font-size:1.05rem">
+      The quotes on this table are generated with Black–Scholes so the board looks
+      like a real one, but the thing being scored never touches it. Parity is an
+      invariant, not a model — the same kind of claim as a ledger that must sum to
+      zero, or a write that must survive a crash. Finding the board where it has
+      quietly stopped holding is the whole job.
+    </p>
+    <p class="mono faint" style="margin:0">
+      Boards are called fair inside a 5¢ tolerance, since quotes are rounded to the cent.
+    </p>
+  </div>
+
+</section>
+
+</main>
+
+<script src="/js/site.js"></script>
+<script src="/js/leaderboard.js"></script>
+<script src="/js/parity-math.js"></script>
+<script src="/js/parity.js"></script>
+</body>
+</html>

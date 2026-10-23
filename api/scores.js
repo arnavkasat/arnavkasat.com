@@ -60,6 +60,7 @@ function configured() {
 var GAMES = {
   blackjack:  { better: 'higher', min: 0, max: 100, gate: 'decisions', gateMin: 50 },
   odds:       { better: 'lower',  min: 0, max: 100, gate: 'answered',  gateMin: 16 },
+  parity:     { better: 'higher', min: 0, max: 100, gate: 'rounds',    gateMin: 20 },
   pickleball: { better: 'higher', min: 1, max: 500, gate: 'rallies',   gateMin: 1 }
 };
 

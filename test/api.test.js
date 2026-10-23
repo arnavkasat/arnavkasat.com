@@ -110,8 +110,12 @@ async function suite(label, zcard) {
   check(t('markup stripped, truncated to 16'), r.body.board[0].name, 'scriptxscript Bo');
   check(t('detail kept'), r.body.board[0].detail.level, 'hard');
 
+  await call('POST', { body: { game: 'parity', name: 'Arnav', score: 88.5, detail: { rounds: 40, streak: 11 } } });
+  check(t('parity posts'), (await call('GET', { query: { game: 'parity' } })).body.board[0].score, 88.5);
+  check(t('parity gate'), (await call('POST', { body: { game: 'parity', name: 'A', score: 100, detail: { rounds: 4 } } })).status, 400);
+
   r = await call('GET', { query: { game: 'all' } });
-  check(t('all -> three boards'), Object.keys(r.body.boards).sort(), ['blackjack', 'odds', 'pickleball']);
+  check(t('all -> four boards'), Object.keys(r.body.boards).sort(), ['blackjack', 'odds', 'parity', 'pickleball']);
   check(t('all -> five apiece at most'), r.body.boards.blackjack.length <= 5, true);
 
   for (let i = 0; i < 70; i++) {

@@ -30,6 +30,14 @@
           (d.sharp != null ? ' · ' + d.sharp + ' within a point' : '');
       }
     },
+    parity: {
+      title: 'Arbitrage spotting',
+      unit: function (v) { return v.toFixed(1) + '%'; },
+      sub: function (d) {
+        return (d.rounds || 0) + ' boards' +
+          (d.streak != null ? ' \u00b7 best streak ' + d.streak : '');
+      }
+    },
     pickleball: {
       title: 'Longest rally',
       unit: function (v) { return Math.round(v) + (Math.round(v) === 1 ? ' shot' : ' shots'); },
@@ -243,7 +251,12 @@
           var fmt = FORMAT[game];
           if (!fmt) return;
           var card = el('div', 'panel');
-          card.appendChild(el('h3', null, { blackjack: '♠ Blackjack', odds: '♥ Odds Oracle', pickleball: '♣ Pickleball' }[game]));
+          card.appendChild(el('h3', null, {
+            blackjack: '♠ Blackjack',
+            odds: '♥ Odds Oracle',
+            parity: '♦ Parity Table',
+            pickleball: '♣ Pickleball'
+          }[game]));
           card.appendChild(el('p', 'mono faint', fmt.title));
           var inner = el('div');
           renderBoard(inner, game, body.boards[game], game === 'odds' ? 'lower' : 'higher');
