@@ -730,3 +730,105 @@ footer {
   color: var(--ink);
 }
 .parity-legs li::marker { color: var(--neon-gold); }
+
+/* ===========================================================
+   The agent gym
+   =========================================================== */
+
+.gym-toggle {
+  display: inline-flex;
+  border: 1px solid rgba(255, 201, 60, 0.3);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.4);
+  margin-bottom: 12px;
+}
+.gym-toggle button {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.gym-toggle button:hover { color: var(--ink); }
+.gym-toggle button.on {
+  background: rgba(255, 201, 60, 0.12);
+  color: var(--neon-gold);
+  text-shadow: 0 0 10px rgba(255, 201, 60, 0.5);
+}
+.gym-toggle button#gLeaky.on {
+  background: rgba(255, 45, 149, 0.14);
+  color: var(--neon-pink);
+  text-shadow: 0 0 10px rgba(255, 45, 149, 0.5);
+}
+.gym-toggle button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.gym-note { font-size: 1.05rem; min-height: 4.2em; margin-bottom: 14px; }
+.gym-note b { color: var(--ink); }
+
+.gym-verdict {
+  font-family: var(--font-display);
+  font-size: clamp(0.62rem, 1.7vw, 0.8rem);
+  line-height: 1.6;
+  text-align: center;
+  margin: 0 0 18px;
+  min-height: 1.6em;
+}
+.gym-verdict.bad {
+  color: var(--neon-red);
+  text-shadow: 0 0 16px rgba(255, 59, 59, 0.45);
+}
+.gym-verdict.ok {
+  color: var(--neon-green);
+  text-shadow: 0 0 16px rgba(57, 255, 136, 0.45);
+}
+
+.gym-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--ink-faint);
+}
+.gym-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.gym-legend .sw { width: 11px; height: 11px; border-radius: 3px; display: inline-block; flex: none; }
+
+.gym-map {
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--neon-cyan);
+  margin: 0 0 8px;
+}
+.gym-map-warn { color: var(--neon-pink); }
+
+.gym-loop { list-style: none; counter-reset: gymstep; margin: 0; padding: 0; }
+.gym-loop li {
+  counter-increment: gymstep;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 7px 0;
+  font-size: 1.02rem;
+  color: var(--ink-dim);
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.08);
+}
+.gym-loop li:last-child { border-bottom: none; }
+.gym-loop li::before {
+  content: counter(gymstep);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  line-height: 24px;
+  width: 24px; height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(0, 240, 255, 0.12);
+  color: var(--neon-cyan);
+}
+.gym-loop b { display: block; color: var(--ink); font-weight: 600; }

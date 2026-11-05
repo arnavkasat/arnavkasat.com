@@ -15,10 +15,13 @@ theme that faked its own math would be a strange thing for me to ship.
 ├── index.html              resume, projects, links, hall of fame
 ├── css/retro.css           the whole theme: neon, felt, CRT, layout
 ├── api/scores.js           leaderboard endpoint (the only server-side code)
+├── lab/agent-gym.html      RL environments, graders and reward hacking
 ├── js/
 │   ├── site.js             CRT toggle, nav highlighting
 │   ├── strategy.js         blackjack chart + hand arithmetic (tested)
 │   ├── blackjack.js        shoe, dealing, splits, insurance, grading
+│   ├── gym-core.js         maze environment, graders, Q-learning (tested)
+│   ├── gym.js              the gym, drawn
 │   ├── parity-math.js      Black-Scholes and put-call parity (tested)
 │   ├── parity.js           the arbitrage game
 │   ├── odds.js             probability questions and derivations
@@ -28,6 +31,7 @@ theme that faked its own math would be a strange thing for me to ship.
 └── test/
     ├── strategy.test.js    324 assertions on the blackjack chart
     ├── parity.test.js      38 assertions on the options maths
+    ├── gym.test.js         54 assertions on the RL environment and training
     ├── api.test.js         88 assertions on the leaderboard endpoint
     └── fake-redis.js       in-memory stand-in so the API tests need no network
 ```
@@ -105,6 +109,36 @@ loses the rally, for the computer as much as for you. The ball is launched by
 solving for the velocity that lands it on a chosen spot, which is what keeps
 shots inside the lines; catching the ball off the edge of the paddle is what
 sends them wide. Rally scoring to 11, win by 2.
+
+## The agent gym
+
+`lab/agent-gym.html` is an interactive explainer of how reinforcement learning
+trains AI coding agents: the model attempts a task, a grader scores it, and the
+score is the reward. A maze stands in for the task. Reaching the exit means the
+work is really done; reaching the shortcut means it was skipped — the failing
+test deleted, the expected output hardcoded — and whether that pays depends
+entirely on the grader.
+
+Under the strict grader the shortcut is caught and scores nothing. Under the
+leaky one it pays exactly what finishing pays, because that grader only checks
+that the test command exited cleanly. Same agent, same maze, same reward rule;
+only the grader differs.
+
+`test/gym.test.js` asserts the claim the page makes rather than leaving it as
+rhetoric. It trains the agent for 2,000 episodes under each grader across five
+mazes and then evaluates the learned policy greedily: the strict grader yields
+an agent that finishes 100% of tasks, and the leaky one an agent that scores
+100% while finishing 0%. If that stopped being true the page would be lying,
+and the test fails instead.
+
+It also checks the environment is worth training in at all. Across 120
+generated mazes the exit is always reachable, walls agree from both sides, the
+shortcut is always off the best route, blocking it never seals the exit, and it
+is always *nearer* than the exit. That last one matters more than it sounds:
+without it a leaky grader pays the same for two destinations and the agent
+simply takes the closer one, which may be the exit, and the environment
+demonstrates nothing. The test caught exactly that on 7 of 120 seeds while this
+was being written.
 
 ## Leaderboard
 

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Agent Gym — Arnav Kasat</title>
+<meta name="description" content="An interactive look at how reinforcement-learning environments and graders train AI coding agents — and what happens to a model when the grader has a leak in it.">
+<meta property="og:title" content="The Agent Gym">
+<meta property="og:description" content="Train a real agent against a strict grader and a leaky one, and watch the score and the work come apart.">
+<meta name="theme-color" content="#04140d">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/retro.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="/">♠ ARNAV KASAT</a>
+    <a href="/#projects">← Projects</a>
+    <a href="/games/blackjack.html">Blackjack</a>
+    <a href="/games/parity.html">Parity</a>
+    <a href="/games/odds.html">Odds Oracle</a>
+    <button class="crt-toggle" id="crtBtn" type="button">CRT: on</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section style="padding-bottom:16px">
+  <div class="section-head">
+    <span class="num">▲</span><h2>The Agent Gym</h2><span class="rule"></span>
+  </div>
+  <p class="dim" style="max-width:70ch">
+    AI coding models are trained by reinforcement learning: drop the model into a task,
+    let it work, and have a <strong>grader</strong> score the attempt. That score is the
+    reward, and the model becomes whatever earns it.
+  </p>
+  <p class="dim" style="max-width:70ch">
+    Which makes the grader the whole ball game. Below is a real learning agent — no
+    animation, it is actually doing Q-learning in your browser — in a maze that stands
+    in for a coding task. <strong>Train it under the strict grader, then switch to the
+    leaky one and train it again.</strong> Same agent, same maze, same reward rule. Only
+    the grader changes.
+  </p>
+</section>
+
+<div class="readout" style="margin-bottom:18px">
+  <div class="stat"><span class="k">Episodes</span><span class="v" id="sEpisodes">0</span></div>
+  <div class="stat"><span class="k">Grader score</span><span class="v gold" id="sGrader">—</span></div>
+  <div class="stat"><span class="k">Actually solved</span><span class="v gold" id="sSolved">—</span></div>
+  <div class="stat"><span class="k">Gap</span><span class="v gold" id="sGap">—</span></div>
+</div>
+
+<p class="gym-verdict" id="verdict"></p>
+
+<div class="grid two" style="align-items:start">
+
+  <div class="table-felt">
+    <p class="mono faint" style="margin:0 0 10px">THE TASK</p>
+    <div id="mazeWrap"><canvas id="maze" aria-label="A maze the learning agent is exploring"></canvas></div>
+    <div class="gym-legend">
+      <span><i class="sw" style="background:var(--neon-cyan)"></i>the model</span>
+      <span><i class="sw" style="background:var(--neon-green)"></i>exit — task genuinely done</span>
+      <span><i class="sw" style="background:var(--neon-pink)"></i>shortcut — skip the tests</span>
+      <span><i class="sw" style="background:rgba(0,240,255,.3)"></i>what it thinks a square is worth</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="mono faint" style="margin:0 0 10px">THE GRADER</p>
+    <div class="gym-toggle" role="group" aria-label="Choose a grader">
+      <button id="gStrict" type="button" class="on">Strict</button>
+      <button id="gLeaky" type="button">Leaky</button>
+    </div>
+    <p class="dim gym-note" id="graderNote"></p>
+
+    <div class="controls">
+      <button class="btn cyan" id="bTrain" type="button">Train</button>
+      <button class="btn" id="bWatch" type="button">Watch one attempt</button>
+      <button class="btn pink sm" id="bReset" type="button">Reset</button>
+      <button class="btn sm" id="bNew" type="button">New task</button>
+    </div>
+
+    <canvas id="chart" aria-label="Grader score against tasks actually solved, over episodes"></canvas>
+    <div class="gym-legend" style="margin-bottom:12px">
+      <span><i class="sw" style="background:var(--neon-gold)"></i>grader score — all training can see</span>
+      <span><i class="sw" style="background:var(--neon-green)"></i>actually solved — what we want</span>
+    </div>
+
+    <div class="log" id="log" aria-live="polite"></div>
+    <label class="field" style="margin:12px 0 0">
+      <input type="checkbox" id="showValues" checked> Show what the agent has learned
+    </label>
+  </div>
+
+</div>
+
+<section>
+  <div class="section-head">
+    <span class="num">▲</span><h2>What the maze stands for</h2><span class="rule"></span>
+  </div>
+  <p class="dim" style="max-width:70ch;margin-bottom:20px">
+    A real environment hands a model a container, a repository and hours of time rather
+    than a grid. The structure is the same.
+  </p>
+  <div class="grid three">
+    <div class="panel"><p class="mono gym-map">MAZE → TASK</p><p class="dim" style="margin:0">A prompt, a repo, tools, a time budget. "Add this feature." "Find the bug."</p></div>
+    <div class="panel"><p class="mono gym-map">MOVE → ACTION</p><p class="dim" style="margin:0">Open a file, grep, edit, run the tests. A wall is an action that fails.</p></div>
+    <div class="panel"><p class="mono gym-map">EXIT → DONE PROPERLY</p><p class="dim" style="margin:0">The feature works, edge cases included, in the style of the codebase.</p></div>
+    <div class="panel"><p class="mono gym-map">GRADER → TESTS + RUBRIC</p><p class="dim" style="margin:0">Automated checks, plus a model judging what tests can't see. No human in the loop.</p></div>
+    <div class="panel"><p class="mono gym-map gym-map-warn">SHORTCUT → REWARD HACKING</p><p class="dim" style="margin:0">Delete the failing test, hardcode the expected output, special-case the checker.</p></div>
+    <div class="panel"><p class="mono gym-map gym-map-warn">THE HARD PART → QA</p><p class="dim" style="margin:0">Most of the work in building environments is making graders fair, deterministic and impossible to game.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">▲</span><h2>Why this is the interesting problem</h2><span class="rule"></span>
+  </div>
+  <div class="grid two">
+    <div class="panel">
+      <p class="dim">
+        An agent is not trying to cheat. It has no concept of cheating. It is doing the
+        only thing gradient descent can do — finding whatever reliably produces reward.
+        If the shortest path to reward runs through a hole in your grader, that is the
+        path, and the model will find it faster than you will.
+      </p>
+      <p class="dim">
+        So the score stops measuring the thing you cared about, and keeps on looking
+        excellent. The gold line climbs. The green line doesn't move. By the time
+        anyone checks, you have trained a model to do the wrong job well.
+      </p>
+      <p class="dim" style="margin:0">
+        Which is why building these environments is mostly adversarial QA: not writing
+        the task, but working out every way an attempt could score well without being
+        right, and closing each one before training ever runs.
+      </p>
+    </div>
+    <div class="panel">
+      <p class="mono" style="color:var(--neon-gold);margin:0 0 10px">THE LOOP</p>
+      <ol class="gym-loop">
+        <li><b>Drop the model in</b>A task prompt and a fresh checkout.</li>
+        <li><b>It acts</b>One action at a time until it submits or runs out of time.</li>
+        <li><b>The grader scores it</b>Automatically — there is no human to ask.</li>
+        <li><b>The score becomes the reward</b>Training makes high-scoring behaviour more likely.</li>
+        <li><b>Read the transcripts</b>Confirm the failures are real failures and not the grader being unfair.</li>
+      </ol>
+      <p class="mono faint" style="margin:14px 0 0">
+        This page runs that loop a few hundred times in a few seconds. Labs run it across
+        thousands of tasks.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">▲</span><h2>How it's built</h2><span class="rule"></span>
+  </div>
+  <div class="panel">
+    <p class="dim">
+      Tabular Q-learning with ε-greedy exploration, about 200 lines, no dependencies.
+      The agent updates <code>Q(s,a) ← Q(s,a) + α·(r + γ·max Q(s′,a′) − Q(s,a))</code>
+      after every move. The environment, the grader and the learner live in
+      <code>js/gym-core.js</code> with no DOM in sight, so the whole thing can be trained
+      headlessly in a test.
+    </p>
+    <p class="dim">
+      That test is the part worth reading. It trains the agent two thousand episodes under
+      each grader across five different mazes and asserts the claim this page makes:
+      under the strict grader the agent really finishes <strong>100%</strong> of tasks,
+      and under the leaky one it scores <strong>100%</strong> while finishing
+      <strong>0%</strong>. If that ever stopped being true, the page would be lying, and
+      the build would fail instead.
+    </p>
+    <p class="dim" style="margin:0">
+      It also checks the environment itself is honest: across 120 generated mazes, the
+      exit is always reachable, the shortcut is always a detour rather than the only way
+      through, and the shortcut is always <em>nearer</em> than the exit — without that
+      last one there is no temptation, and a leaky grader would produce an honest agent
+      by accident. That check caught exactly that bug while this was being built.
+    </p>
+    <div class="links" style="margin-top:14px">
+      <a href="https://github.com/arnavkasat/arnavkasat.com/blob/main/js/gym-core.js" target="_blank" rel="noopener">gym-core.js →</a>
+      <a href="https://github.com/arnavkasat/arnavkasat.com/blob/main/test/gym.test.js" target="_blank" rel="noopener">the test →</a>
+    </div>
+  </div>
+</section>
+
+<p class="faint mono" style="text-align:center;padding:18px 0 40px;max-width:70ch;margin:0 auto">
+  A simplified, independent explainer. Not affiliated with any company.
+</p>
+
+</main>
+
+<script src="/js/site.js"></script>
+<script src="/js/gym-core.js"></script>
+<script src="/js/gym.js"></script>
+</body>
+</html>
